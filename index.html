@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DVA — Demon vs Angel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bgSolid: #2B2A2A;
+      --text: rgba(255,255,255,.96);
+      --muted: rgba(255,255,255,.74);
+      --border: rgba(255,255,255,.10);
+      --accent: rgba(255, 80, 80, .90);
+      --accent2: rgba(190, 40, 40, .90);
+
+      --max: 1100px;
+      --padX: clamp(18px, 5vw, 56px);
+      --sectionY: clamp(86px, 11vw, 160px);
+
+      --navRadius: 999px;
+      --shadow: 0 22px 70px rgba(0,0,0,.45);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; scroll-behavior: smooth; }
+    body{
+      margin:0;
+      color: var(--text);
+      background: var(--bgSolid);
+      overflow-x: hidden;
+      font-family: "Cinzel", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    /* Permite selecionar dentro de campos de texto (busca do índice, etc.) */
+    input, textarea {
+      -webkit-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+
+    /* ===== BACKGROUND STACK ===== */
+    .bgStack{
+      position: fixed;
+      inset: 0;
+      z-index: -10;
+      overflow: hidden;
+      background: #000;
+    }
+    .bgVideo{ position:absolute; inset:0; }
+    .bgVideo video{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.08);
+      will-change: opacity, filter, transform;
+      opacity: 1;
+      filter: contrast(1.02) saturate(0.95);
+    }
+    .bgSolid{
+      position:absolute;
+      inset:0;
+      background: var(--bgSolid);
+      opacity: 0;
+      will-change: opacity;
+    }
+
+    .vignette{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(1000px 560px at 50% 20%, rgba(255,80,80,.10), transparent 62%),
+        radial-gradient(1200px 760px at 50% 120%, rgba(0,0,0,.76), rgba(0,0,0,.18) 55%, rgba(0,0,0,.80));
+      opacity: .95;
+    }
+
+    .gridLayer{
+      position:absolute;
+      inset:-10%;
+      pointer-events:none;
+      opacity: .18;
+      mix-blend-mode: screen;
+      background:
+        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+      background-size: 72px 72px;
+      transform: translate3d(0,0,0);
+      will-change: transform, opacity;
+      mask-image: radial-gradient(circle at 50% 35%, rgba(0,0,0,.85), transparent 70%);
+    }
+
+    .sigilsLayer{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity: .22;
+      mix-blend-mode: screen;
+      filter: drop-shadow(0 0 14px rgba(255,80,80,.16));
+      will-change: transform, opacity;
+    }
+    .sigilsLayer::before{
+      content:"";
+      position:absolute;
+      inset:-10%;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='820' height='520'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.55)' stroke-width='1.1'%3E%3Cpath d='M120 90 l30 -40 l30 40 l-30 40 z'/%3E%3Cpath d='M520 120 l25 -35 l25 35 l-25 35 z'/%3E%3Cpath d='M260 360 c60 -70 130 -70 190 0'/%3E%3Cpath d='M610 380 c50 -60 90 -60 140 0'/%3E%3Cpath d='M90 430 c40 -50 70 -50 110 0'/%3E%3Cpath d='M400 250 m-55 0 a55 55 0 1 0 110 0 a55 55 0 1 0 -110 0'/%3E%3Cpath d='M400 195 v110 M345 250 h110'/%3E%3C/g%3E%3Cg fill='rgba(255,80,80,0.55)'%3E%3Ccircle cx='140' cy='92' r='2.2'/%3E%3Ccircle cx='545' cy='118' r='2.2'/%3E%3Ccircle cx='610' cy='380' r='2.2'/%3E%3Ccircle cx='100' cy='430' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 820px 520px;
+      opacity: .7;
+    }
+
+    .fog{
+      position:absolute;
+      inset:-15%;
+      pointer-events:none;
+      opacity: .38;
+      mix-blend-mode: screen;
+      will-change: transform, opacity;
+    }
+    .fog::before,
+    .fog::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(600px 260px at 20% 30%, rgba(255,255,255,.10), transparent 60%),
+        radial-gradient(700px 280px at 70% 55%, rgba(255,80,80,.10), transparent 62%),
+        radial-gradient(620px 300px at 55% 80%, rgba(255,255,255,.08), transparent 65%);
+      opacity: .8;
+    }
+    .fog::after{
+      opacity: .6;
+      transform: translate3d(40px, 20px, 0) scale(1.05);
+      filter: blur(1.1px);
+    }
+
+    .grain{
+      position:absolute;
+      inset:-30%;
+      pointer-events:none;
+      opacity:.10;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      animation: grainMove 7s steps(6) infinite;
+    }
+    @keyframes grainMove{
+      0%{ transform: translate3d(0,0,0); }
+      20%{ transform: translate3d(-2%, 2%, 0); }
+      40%{ transform: translate3d(-3%, -1%, 0); }
+      60%{ transform: translate3d(2%, 3%, 0); }
+      80%{ transform: translate3d(3%, -2%, 0); }
+      100%{ transform: translate3d(0,0,0); }
+    }
+
+    canvas#particles{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity: .55;
+      mix-blend-mode: screen;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navWrap{
+      position: sticky;
+      top: 18px;
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      padding: 0 14px;
+    }
+    .nav{
+      display:flex;
+      gap: 6px;
+      align-items:center;
+      padding: 8px;
+      border-radius: var(--navRadius);
+      background: rgba(18,18,18,.34);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .nav a{
+      text-decoration:none;
+      color: rgba(255,255,255,.86);
+      font-weight: 700;
+      font-size: .90rem;
+      letter-spacing: .05em;
+      padding: 10px 14px;
+      border-radius: var(--navRadius);
+      transition: background .2s ease, color .2s ease, transform .15s ease;
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-family: "Cinzel", system-ui, sans-serif;
+    }
+    .nav a:hover{
+      background: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.98);
+      transform: translateY(-1px);
+    }
+    .nav a.is-active{
+      background: rgba(255,255,255,.14);
+      color: rgba(255,255,255,.98);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset;
+    }
+
+    /* ===== CONTENT ===== */
+    .container{
+      width: min(var(--max), 100%);
+      margin: 0 auto;
+      padding: 0 var(--padX);
+    }
+
+    .hero{
+      padding: calc(var(--sectionY) + 20px) 0 var(--sectionY);
+      min-height: 92svh;
+      display:flex;
+      align-items: center;
+    }
+    .heroInner{ max-width: 78ch; }
+
+    .kicker{
+      text-transform: uppercase;
+      letter-spacing: .22em;
+      font-weight: 800;
+      font-size: .78rem;
+      color: rgba(255,255,255,.68);
+      margin: 0 0 18px;
+    }
+
+    h1, h2, h3, h4 { font-family: "Cinzel Decorative","Cinzel",system-ui,sans-serif; }
+    h1{
+      margin: 0 0 22px;
+      font-size: clamp(2.8rem, 6vw, 5.1rem);
+      line-height: .95;
+      letter-spacing: -.02em;
+      -webkit-text-stroke: 1px rgba(0,0,0,.55);
+      text-shadow:
+        0 2px 18px rgba(0,0,0,.42),
+        0 0 26px rgba(255,80,80,.12);
+    }
+
+    .lead{
+      margin: 0;
+      font-size: clamp(1.05rem, 1.2vw, 1.2rem);
+      line-height: 1.9;
+      color: var(--muted);
+      max-width: 78ch;
+      text-shadow: 0 2px 14px rgba(0,0,0,.35);
+    }
+
+    .actions{ margin-top: 30px; display:flex; gap: 12px; flex-wrap: wrap; align-items:center; }
+
+    .btn{
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(0,0,0,.18);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 18px;
+      font-weight: 900;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 14px 40px rgba(0,0,0,.25);
+      font-family: "Cinzel", system-ui, sans-serif;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.30); }
+    .btn.primary{
+      border-color: rgba(255,80,80,.32);
+      background: linear-gradient(180deg, rgba(255,80,80,.90), rgba(190,40,40,.90));
+      box-shadow: 0 0 32px rgba(255,80,80,.18), 0 18px 55px rgba(0,0,0,.28);
+    }
+    .btn.primary:hover{ box-shadow: 0 0 44px rgba(255,80,80,.26), 0 22px 65px rgba(0,0,0,.32); }
+
+    section{ padding: var(--sectionY) 0; scroll-margin-top: 110px; }
+
+    .sectionTitle{
+      margin: 0 0 14px;
+      font-size: clamp(1.55rem, 2.8vw, 2.25rem);
+      letter-spacing: .01em;
+      -webkit-text-stroke: .8px rgba(0,0,0,.55);
+      text-shadow: 0 2px 16px rgba(0,0,0,.42);
+    }
+
+    /* Floating text (sem retângulo) */
+    .prose.float{
+      margin-top: 16px;
+      line-height: 2.0;
+      color: rgba(255,255,255,.82);
+      font-size: 1.02rem;
+      max-width: 96ch;
+      text-shadow: 0 2px 14px rgba(0,0,0,.30);
+    }
+    .prose.float p{ margin: 0 0 14px; }
+
+    .chapterTitle{
+      margin: 0 0 10px;
+      font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+      -webkit-text-stroke: .6px rgba(0,0,0,.55);
+      text-shadow: 0 2px 16px rgba(0,0,0,.40);
+    }
+    .subTitle{
+      margin: 22px 0 8px;
+      font-size: 1.05rem;
+      letter-spacing: .02em;
+      opacity: .95;
+      -webkit-text-stroke: .45px rgba(0,0,0,.55);
+      text-shadow: 0 2px 14px rgba(0,0,0,.32);
+    }
+
+    /* Reveal */
+    .reveal{
+      opacity: 1;
+      transform: none;
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    body.js .reveal{
+      opacity: 1;
+      transform: none;
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    body.js .reveal.is-visible{ opacity: 1; transform: translateY(0); }
+
+    /* ===== INFO layout (índice + conteúdo) ===== */
+    .infoGrid{
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 18px;
+      align-items: start;
+      margin-top: 18px;
+    }
+    .toc{
+      position: sticky;
+      top: 92px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      padding: 14px;
+      max-height: calc(100svh - 120px);
+      overflow: auto;
+    }
+    .tocTitle{
+      font-weight: 900;
+      margin: 6px 0 10px;
+      font-size: 1.05rem;
+      -webkit-text-stroke: .5px rgba(0,0,0,.55);
+      text-shadow: 0 2px 12px rgba(0,0,0,.35);
+    }
+    .tocSearch{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.86);
+      outline: none;
+      font-family: "Cinzel", system-ui, sans-serif;
+    }
+    .tocList{ margin-top: 12px; display:flex; flex-direction: column; gap: 6px; padding-bottom: 6px; }
+    .toc a{
+      text-decoration:none;
+      color: rgba(255,255,255,.76);
+      border-radius: 14px;
+      padding: 9px 10px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      transition: background .2s ease, transform .15s ease, color .2s ease;
+      font-size: .92rem;
+      line-height: 1.2;
+    }
+    .toc a:hover{ background: rgba(255,255,255,.08); transform: translateY(-1px); color: rgba(255,255,255,.90); }
+
+    .infoDoc{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: transparent;
+      backdrop-filter: none;
+      box-shadow: none;
+      padding: 18px;
+    }
+
+    .infoChapter{ padding: 22px 4px; border-top: 1px solid rgba(255,255,255,.08); }
+    .infoChapter:first-child{ border-top: none; padding-top: 10px; }
+
+    /* Botão topo */
+    .toTop{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 60;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.24);
+      backdrop-filter: blur(14px);
+      color: rgba(255,255,255,.95);
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease, background .2s ease;
+    }
+    .toTop:hover{ background: rgba(255,255,255,.10); }
+    .toTop.is-visible{ opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .toTop svg{ width: 20px; height: 20px; fill: currentColor; }
+
+    /* ===== Música (prompt + botão) ===== */
+    .audioPrompt{
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 120;
+      width: min(320px, calc(100% - 36px));
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.26);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
+      padding: 12px 12px 10px;
+      display: none;
+    }
+    .audioPromptTitle{
+      font-family: "Cinzel Decorative","Cinzel",system-ui,sans-serif;
+      font-weight: 900;
+      font-size: 1rem;
+      color: rgba(255,255,255,.95);
+      -webkit-text-stroke: .5px rgba(0,0,0,.55);
+      text-shadow: 0 2px 14px rgba(0,0,0,.35);
+      margin-bottom: 4px;
+    }
+    .audioPromptText{ color: rgba(255,255,255,.74); line-height: 1.5; font-size: .92rem; margin-bottom: 10px; }
+    .audioPromptActions{ display:flex; gap: 10px; flex-wrap: wrap; }
+    .audioPBtn{
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      font-family: "Cinzel",system-ui,sans-serif;
+    }
+    .audioPBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.26); }
+    .audioPBtnPrimary{
+      border-color: rgba(255,80,80,.32);
+      background: linear-gradient(180deg, rgba(255,80,80,.90), rgba(190,40,40,.90));
+      box-shadow: 0 0 28px rgba(255,80,80,.18);
+    }
+    .audioFab{
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 119;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.20);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.45);
+      cursor: pointer;
+      display:none;
+      place-items: center;
+    }
+    .audioFab:hover{ background: rgba(255,255,255,.08); }
+    .audioFab svg{ width: 18px; height: 18px; fill: rgba(255,255,255,.82); opacity: .92; filter: drop-shadow(0 0 10px rgba(255,255,255,.10)); }
+
+    /* Responsivo */
+    @media (max-width: 980px){ .infoGrid{ grid-template-columns: 1fr; } .toc{ position: relative; top: 0; max-height: none; } }
+    @media (max-width: 720px){ .nav{ gap: 4px; padding: 7px; } .nav a{ padding: 9px 12px; font-size: .86rem; } .hero{ min-height: 86svh; } .audioPrompt{ width: min(300px, calc(100% - 36px)); } }
+    @media (prefers-reduced-motion: reduce){ .grain{ animation: none; } .reveal{
+      opacity: 1;
+      transform: none;
+      transition: opacity .8s ease, transform .8s ease;
+    } .nav a, .btn, .audioPBtn{ transition: none; } }
+  .contactActions{
+  margin-top: 30px;
+}
+
+.discordBtn{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  text-decoration: none;
+  color: rgba(255,255,255,.92);
+
+  padding: 10px 18px;
+  border-radius: 16px;
+
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(0,0,0,.22);
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+
+  transition: transform .15s ease,
+              background .2s ease,
+              box-shadow .2s ease;
+}
+
+.discordBtn svg{
+  width: 14px;
+  height: 14px;
+  fill: rgba(255,255,255,.92);
+  opacity: .95;
+}
+
+.discordBtn:hover{
+  transform: translateY(-2px);
+  background: rgba(255,255,255,.08);
+  box-shadow: 0 0 20px rgba(255,255,255,.12);
+}
+
+/* garante que o botão de música não suma */
+.audioFab{ z-index: 200 !important; }
+.audioPrompt{ z-index: 210 !important; }
+
+  </style>
+</head>
+
+<body>
+  <div class="bgStack" aria-hidden="true">
+    <div class="bgVideo">
+      <video id="bgVideoEl" autoplay muted loop playsinline preload="metadata">
+        <source src="video.mp4" type="video/mp4" />
+      </video>
+    </div>
+
+    <div class="bgSolid" id="bgSolid"></div>
+    <div class="vignette"></div>
+    <div class="gridLayer" id="gridLayer"></div>
+    <div class="sigilsLayer" id="sigilsLayer"></div>
+    <div class="fog" id="fogLayer"></div>
+    <canvas id="particles"></canvas>
+    <div class="grain"></div>
+  </div>
+
+  <div class="navWrap">
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="#sobre">Sobre</a>
+      <a href="#info">Info</a>
+      <a href="#contato">Contate-me</a>
+    </nav>
+  </div>
+
+  <main class="container" id="top">
+    <header class="hero">
+      <div class="heroInner reveal">
+        <p class="kicker">Demon vs Angel</p>
+        <h1>Crie mundos, construa histórias!</h1>
+
+        <p class="lead">
+          Demon vs Angel é um sistema de rpg de mesa original que pode ser utilizado para criação dos
+          mais diversos mundos de fantasias centrados em um conflito entre seres sobrenaturais e humanos.
+        </p>
+
+        <div class="actions">
+          <button class="btn primary" type="button" onclick="document.querySelector('#prefacio').scrollIntoView({behavior:'smooth'})">
+            O começo...
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section id="prefacio">
+      <div class="reveal">
+        <h2 class="sectionTitle">Do Nada, do Sonho e da Vigília</h2>
+        <div class="prose float">
+          <h4 class="subTitle">Capa Em Criação</h4>
+<p>Do Nada, do Sonho e da Vigília Antes de qualquer coisa existir, existia o nada. E no nada, havia algo. Não um deus no sentido que os mortais entendem. Não um conceito, nem uma entidade regida por leis. Apenas um ser — sem nome, sem forma, sem necessidade de explicação. Uma contradição viva, tolerada pela própria inexistência. Ele existia porque podia existir. E isso bastava. No vazio absoluto, esse ser sentiu algo que jamais deveria tocar um criador: tédio. Não o tédio da escassez, mas o tédio do excesso. Quando nada pode surpreender, até a eternidade se torna insuportável. E assim, por puro egoísmo, o ser criou. Criou o espaço e o tempo, mas também criou versões onde nenhum dos dois fazia sentido. Criou universos paralelos como bolhas flutuando em um vazio maior ainda. Criou leis apenas para quebrá-las. Criou o acaso como estrutura e o caos como regra. Criou tudo… enquanto dormia. No interior desse sono profundo, nasceu um universo inteiro. Deuses surgiram e deram nomes a si mesmos.</p>
+<p>Mortais rastejaram em busca de sentido. Guerras foram travadas por ideias que nunca deveriam ter existido. Céu e Inferno ergueram-se como opostos imperfeitos. O sobrenatural foi temido, adorado e caçado. Nesse sonho, um deus chamado YHWH acreditou ser o primeiro. Nesse sonho, primordiais desafiaram a própria criação. Nesse sonho, anjos caíram, demônios ascenderam e a humanidade ousou lutar contra ambos. Nesse sonho, houve quatro grandes guerras, cada uma mais absurda que a anterior. O mundo foi dividido, reconstruído, avançou tecnologicamente além do possível e regrediu por decisão divina. Deuses foram derrubados por jogadores do próprio destino. O céu queimou cidades. O inferno mudou de mãos. A neutralidade tornou-se uma potência. E no centro de tudo isso, uma garota. Elizabeth. Morta ainda criança, violada pela crueldade humana, transformada em espírito — e mesmo assim incapaz de odiar. Amada por vivos e mortos. Adotada pelo próprio criador inconsciente. De encarnação da bondade, tornou-se encarnação do caos. Ela cresceu. E aprendeu. Aprendeu a fundir sua essência com o poder que jamais deveria ser herdado. Absorveu, sem saber, aquilo que tornava seu pai invulnerável: a capacidade de ferir a si mesmo. Até que o criador, enfraquecido pelo próprio sonho, tornou-se mortal.</p>
+<p>Quando invasores de uma dimensão impossível atacaram, todas as potências lutaram juntas pela primeira vez. O ser sem nome sacrificou-se para selar o inimigo dentro de si. E Elizabeth… quebrou. O Armageddon não veio como punição divina, mas como colapso emocional. O mundo ruiu. Os Cavaleiros Sem Nome cumpriram seu papel. E, no fim, foi o amor — torto, humano, proibido — que trouxe Elizabeth de volta. Arrependida, ela decidiu algo impossível: Nunca mais haveria guerras. Nunca mais haveria morte. Ela refez a realidade. Criou a Era Caótica. Um mundo onde o sobrenatural estava em tudo, onde ninguém morria, onde toda ficção existia como universo paralelo, onde deuses multiplicavam-se como reflexos quebrados. E então… o sonho acabou. O ser primordial despertou. Não houve explosão. Não houve juízo final. Não houve ira. Tudo simplesmente deixou de ser. Céu, Inferno, deuses, guerras, Elizabeth — tudo retornou ao estado original: o nada. Não como destruição, mas como correção. Como alguém apagando um rascunho que ficou grande demais. Por um tempo impossível de medir, o ser permaneceu desperto. Talvez refletisse. Talvez aceitasse que até mesmo um criador pode se perder dentro da própria imaginação.</p>
+<p>Então, pela primeira vez, ele criou acordado. Do próprio ser, separou três fragmentos. Não filhos. Não aspectos. Não funções isoladas. Três consciências completas, criadas para existir juntas, observar juntas e cuidar juntas daquilo que nasceria. Esses três deuses não dividiram o universo entre si. Não governam conceitos separados. Não são hierarquias. Eles são responsáveis em conjunto. Onde um observa, os outros compreendem. Onde um age, os outros sustentam. Onde um falha, os outros corrigem. Sob sua vigilância compartilhada, o universo nasceu novamente. Mais estável. Mais contido. Ainda vasto, ainda perigoso — mas agora real. Não fruto de um sonho, mas de uma decisão. Quando tudo estava em equilíbrio, o ser primordial voltou a dormir. Não por tédio. Mas porque o universo, enfim, podia existir sem ele. O mundo que você jogará não é o sonho antigo. Não é a Era Caótica. Não é o delírio de uma deusa entediada. É o universo desperto. Mas sonhos deixam marcas. Ecos persistem. E às vezes, o nada… se remexe.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="sobre">
+      <div class="reveal">
+        <h2 class="sectionTitle">Sobre</h2>
+<p>
+À partir de agora você irá embarcar em um projeto extremamente ambicioso. Este sistema nasceu da vontade de reviver e adaptar um antigo RPG que acabou a anos atrás, onde humanos não eram meros espectadores de uma guerra divina, mas agentes ativos em um mundo onde o sobrenatural existe e cobra seu preço. Ao longo dos anos, diversas tentativas de recriar os anos de glória do RPG Demon vs Angel aconteceram e falharam, ajustes e reestruturações, sempre com o mesmo objetivo: criar um sistema equilibrado, flexível e capaz de lidar com combates intensos, escolhas difíceis e consequências reais, assim como era o RPG original. Até que, em meio a uma inspiração momentânea e um impulso de motivação, surgiu Demon vs Angel - Ecos Distantes.
+</p>
+
+<p>
+Dito isto, sinta-se livre para usar este livro para contar histórias ambientadas no universo de Demon vs Angel, explorando conflitos entre Céu, Inferno e humanidade, ou pode criar sua própria interpretação desse mundo: novas organizações, novas facções, novas ameaças sobrenaturais e novos personagens. O sistema foi feito para comportar desde campanhas mais contidas e investigativas até histórias épicas envolvendo guerras ocultas, entidades poderosas e humanos que ousam enfrentar o impossível.
+</p>
+
+<p>
+Quem cria essas histórias é você, o Mestre, junto com seus jogadores. Cada jogador controlará um personagem humano ou ser sobrenatural que irá interagir com esse mundo instável. Suas decisões moldam o rumo da narrativa, enquanto as regras ajudam a definir o que acontece quando alguém tenta ir além de seus limites.
+</p>
+
+<p>
+Diferente de uma história escrita ou de uma conversa livre, o RPG precisa de estrutura. Em Demon vs Angel, as regras existem para determinar as consequências das ações dos personagens. Os jogadores rolam dados para atacar, resistir, controlar forças sobrenaturais ou simplesmente sobreviver a situações adversas. Quase tudo é possível — mas os atributos, recursos e escolhas tornam alguns resultados mais prováveis que outros.
+</p>
+
+<p>
+Durante o jogo, os personagens evoluem. Eles treinam, encontram artefatos, despertam para o sobrenatural e aprendem, muitas vezes da forma mais dolorosa, que poder nunca vem sem custo. Esse crescimento é representado por atributos, especializações, níveis de Exposição ao Sobrenatural e outras mecânicas que refletem tanto o avanço quanto o desgaste causado pela jornada.
+</p>
+
+<p>
+Enquanto isso, um dos jogadores assume o papel de Mestre. O Mestre descreve o mundo, apresenta os conflitos, interpreta aliados e inimigos e decide como o sobrenatural reage às ações do grupo. O Mestre não é um adversário dos jogadores, mas sim o responsável por criar desafios interessantes, dilemas morais e situações que tornem a história memorável.
+</p>
+
+<p>
+Dito isso… não tenha medo de colocar seus jogadores em apuros. Às vezes, sobreviver por pouco ensina mais do que vencer facilmente.
+</p>
+
+<p>
+O RPG não possui um “final verdadeiro”. Uma campanha pode durar algumas sessões ou se estender por meses, até anos. Quando uma história termina, outra pode começar — com novos arcos, novas ameaças e personagens marcados pelas escolhas do passado. Mesmo a derrota não significa o fim; muitas vezes, ela é apenas o começo de algo maior.
+</p>
+
+<p>
+Em Demon vs Angel, não existe vencer ou perder no sentido tradicional. Se o grupo conseguiu criar uma história envolvente, cheia de tensão, decisões difíceis e momentos marcantes, então o objetivo foi alcançado. Agora reúna seus dados, escolha até onde seu personagem está disposto a ir… e descubra o que acontece quando humanos decidem enfrentar anjos, demônios — e as consequências disso.
+</p>
+
+    <section id="info">
+      <div class="reveal">
+        <h2 class="sectionTitle">Info</h2>
+        <p class="lead" style="max-width:90ch">
+          Aqui se encontram as informações básicas que é preciso saber antes de começar a jogar.
+        </p>
+      </div>
+
+<div class="infoGrid">
+          <aside class="toc" aria-label="Índice">
+            <div class="tocTitle">Índice</div>
+            <input class="tocSearch" id="tocSearch" placeholder="Buscar no índice..." />
+            <div class="tocList" id="tocList">
+              <a href="#cap-geral">Geral</a><a href="#cap-combate">Combate</a><a href="#cap-criacão-e-progressão-de-personagem">Criação E Progressão De Personagem</a><a href="#cap-classes">Classes</a><a href="#cap-artefatos">Artefatos</a><a href="#cap-despertar">Despertar</a>
+              <a href="#cap-treinamento-extremo">Treinamento Extremo</a>
+            </div>
+          </aside>
+
+          <article class="infoDoc" aria-label="Conteúdo do livro">
+            
+      <section class="infoChapter" id="cap-geral">
+        <h3 class="chapterTitle">Geral</h3>
+        <div class="prose float">
+          <p>Mecânicas básicas que regem o funcionamento do jogo. Todas as ações realizadas durante uma sessão seguem estas regras fundamentais. Compreender é essencial para entender como o mundo reage às decisões dos jogadores. O sistema foi construído para valorizar decisão, posicionamento e custo. Toda ação tem consequências, e agir sem planejamento pode ser tão perigoso quanto hesitar demais.</p>
+<h4 class="subTitle">Turnos E Rodadas</h4>
+<p>O jogo é organizado em rodadas, que representam um curto intervalo de tempo dentro da narrativa. Durante uma rodada, todos os personagens envolvidos possuem um turno, respeitando a ordem definida pela iniciativa. Cada vez que um personagem pode agir, diz-se que ele está em seu turno. É nesse momento que ele pode se mover, atacar, utilizar habilidades, interagir com o ambiente ou realizar outras ações permitidas pelo sistema.</p>
+<p>No seu turno você tem três Ações Completas e uma Ação Livre. Fora dele, você tem acesso a uma Ação Livre. Quando todos os personagens concluírem seus turnos, uma nova rodada se inicia.</p>
+<h4 class="subTitle">Ação Completa</h4>
+<p>As Ações Completas representam esforços significativos, exigindo atenção total do personagem. Durante seu turno, um personagem pode realizar até três Ações Completas, desde que respeite as limitações de cada uma. Entre os usos mais comuns de Ações Completas estão: ● Movimento normal ou Corrida, deslocando-se pelo campo de batalha; ● Atacar, realizando um ataque utilizando seus respectivos métodos; ● Agir, executando uma ação não ofensiva imediata, como interagir com o ambiente, ajudar um aliado ou realizar uma tarefa sob pressão; ● Preparar uma ação, deixando uma resposta pronta para ser ativada posteriormente. O jogador deve declarar claramente como está utilizando suas Ações Completas durante o turno.</p>
+<h4 class="subTitle">Ação Livre</h4>
+<p>As Ações Livres representam movimentos rápidos, reflexos ou decisões tomadas sem comprometer totalmente o turno. Cada personagem pode realizar: ● 1 Ação Livre em seu próprio turno, e ● 1 Ação Livre fora de seu turno, por rodada. As Ações Livres permitem: ● Movimento normal ou Corrida; ● Preparar uma ação, caso o personagem ainda não possua uma preparação ativa; ● Executar uma Ação Especial. Ações Livres são ideais para reposicionamento, reações rápidas ou ajustes táticos em resposta ao que ocorre no combate.</p>
+<h4 class="subTitle">Preparar Ação</h4>
+<p>Preparar uma ação significa deixar uma resposta pronta para ser ativada como reação a um evento específico durante o embate. Ao preparar uma ação, o jogador define qual ação será realizada e qual será o gatilho que a ativa. Essa ação preparada pode ser utilizada como resposta imediata quando o gatilho ocorrer. É possível preparar: ● um Ataque; uma Defesa; ● uma Esquiva; ● ou Agir, realizando uma ação não ofensiva. Regras importantes sobre preparação: ● Um personagem pode realizar no máximo duas preparações por rodada; ● Apenas uma preparação pode estar ativa ao mesmo tempo.</p>
+<h4 class="subTitle">Ação Especial</h4>
+<p>A Ação Especial é uma ferramenta para permitir que o jogador influencie o combate, indo além das ações padrões. Ela existe para representar criatividade, improviso e uso inteligente do ambiente. Ao declarar uma Ação Especial, o jogador descreve o efeito desejado. O mestre avalia se a ação é possível dentro do contexto da cena e define o atributo mais apropriado para o teste. O teste segue o formato: ● 1d20 + ATRIBUTO Se a ação afetar outros personagens ou criaturas, estes podem resistir normalmente, gerando embates conforme as regras. Cada personagem pode realizar apenas uma Ação Especial por rodada, reforçando seu caráter excepcional e estratégico.</p>
+<h4 class="subTitle">Agir</h4>
+<p>Executa uma ação ofensiva não imediata.</p>
+<h4 class="subTitle">Deslocamento</h4>
+<p>O deslocamento representa a capacidade do personagem de se mover pelo ambiente durante situações de tensão, como combates, perseguições ou fugas. Ele define o quanto o personagem pode se mover, até onde pode alcançar um alvo e como interage com o espaço ao seu redor. A mobilidade é um fator decisivo no sistema. Um bom posicionamento pode evitar danos, criar oportunidades de ataque ou permitir o controle do campo de batalha. O valor de deslocamento de um personagem é determinado pela seguinte fórmula: ● Deslocamento = seis metros + VELOCIDADE / quatro Esse valor representa a distância máxima que o personagem pode percorrer em uma única ação de movimento normal. Terreno, obstáculos, efeitos e condições especiais podem modificar temporariamente esse valor, conforme definido pelo mestre.</p>
+<h4 class="subTitle">Ação Livre De Movimento</h4>
+<p>Durante um turno ou embate, o personagem pode se deslocar utilizando uma Ação Livre para Movimento, que pode assumir duas formas distintas: Movimento normal ou Corrida.</p>
+<h4 class="subTitle">Movimento Normal</h4>
+<p>Ao realizar um movimento normal, o personagem pode andar, avançar ou se posicionar devidamente em qualquer distância até o limite do seu deslocamento máximo. Pode ser interrompido para realizar outras ações, conforme a situação permitir. Essa forma de deslocamento representa movimentação controlada e consciente, adequada para combates táticos e exploração cuidadosa do ambiente.</p>
+<h4 class="subTitle">Corrida</h4>
+<p>A corrida representa um deslocamento rápido e intenso, priorizando velocidade em detrimento do controle. Ao correr, o personagem pode se mover em linha reta a qualquer distância até o dobro do seu deslocamento máximo. Entretanto, esse esforço adicional possui o custo de dobrar a quantidade gasta de energia para se movimentar. Correr pode expor o personagem a riscos adicionais, como perda de posicionamento defensivo ou dificuldade em reagir a ameaças imediatas, conforme a situação narrada.</p>
+<h4 class="subTitle">Alcance</h4>
+<p>Os alcances definem a distância efetiva para ataques e ações durante o combate. Eles determinam quais alvos podem ser afetados e em que condições.</p>
+<h4 class="subTitle">Corpo A Corpo</h4>
+<p>Ações corpo a corpo exigem contato direto ou proximidade imediata de: ● Um metro. Esse alcance representa a distância necessária para golpes físicos, empurrões, agarrões ou técnicas que dependem de contato direto.</p>
+<h4 class="subTitle">Longo Alcance</h4>
+<p>Ações realizadas à distância, como ataques com projéteis ou técnicas que não exigem contato direto, possuem o limite máximo de alcance de: ● Deslocamento multiplicado por dois. Esse limite representa a capacidade prática de atingir um alvo considerando precisão, força e condições do ambiente. Fatores como obstáculos, cobertura, visibilidade ou efeitos</p>
+<p>especiais podem reduzir ou modificar esse alcance, conforme determinado pelo mestre.</p>
+<h4 class="subTitle">Iniciativa</h4>
+<p>A iniciativa determina a ordem de ação dos personagens durante um embate. Ela representa a capacidade de reagir rapidamente a uma situação de perigo, antecipar movimentos inimigos e agir antes que o confronto se desenrole por completo. Em situações de combate ou tensão imediata, a iniciativa define quem age primeiro e estabelece o ritmo da rodada através da seguinte fórmula: ● 1d20 + metade da velocidade. Esse valor reflete tanto a rapidez física quanto a capacidade de reação do personagem. Personagens com maior velocidade tendem a agir antes, aproveitando oportunidades iniciais e controlando o fluxo do combate. Em caso de empate nos valores, cabe ao mestre decidir o critério de desempate mais apropriado para a cena. Isso pode incluir um novo teste, a comparação direta de atributos relevantes ou a resolução simultânea das ações empatadas.</p>
+<h4 class="subTitle">Narrativa moldada</h4>
+<p>Diversas mecânicas novas podem ser adicionadas durante as sessões. O mestre tem liberdade para criar e adicionar coisas que agreguem aos momentos específicos em que as sessões se encontram.</p>
+        </div>
+      </section>
+    
+      <section class="infoChapter" id="cap-combate">
+        <h3 class="chapterTitle">Combate</h3>
+        <div class="prose float">
+          <p>O combate representa situações de confronto direto, onde reflexos, posicionamento, leitura do oponente e gestão de recursos são colocados à prova. Um combate não é apenas uma troca de dano, mas uma sequência de decisões que envolvem acerto, reação, embate e consequência. Todo ataque segue uma estrutura clara: primeiro é verificado se o ataque atinge o alvo, depois ocorre o embate, no qual o alvo reage, e por fim o dano é calculado, caso o ataque não seja evitado. O teste de acerto depende da forma como o ataque é realizado. Para atacantes corpo a corpo e ataques diretos: ● 1d20 + metade da velocidade + valores aplicáveis; Para atacantes a distância: ● 1d20 + metade da precisão + valores aplicáveis; Por fim, para ataques utilizando habilidades sobrenaturais: ● 1d20 + metade da potência + valores aplicáveis.</p>
+<h4 class="subTitle">Dificuldade Do Acerto</h4>
+<p>Para um ataque funcionar, ele obrigatoriamente deve ultrapassar a Dificuldade do Acerto. Que é assim como o ataque, varia em sua fórmula. Sendo ela, para atacantes corpo a corpo ou diretos: ● 10 + metade da velocidade do alvo+valores aplicáveis; E para para atacantes a distância: ● distância em metros + 2.</p>
+<h4 class="subTitle">Embate</h4>
+<p>Após um acerto bem-sucedido, se inicia um embate. Que é quando dois ou mais personagens iniciam uma disputa. Nesse momento, os jogadores têm a oportunidade de reagir ao ataque. Os alvos de uma deve escolher uma única reação entre as opções disponíveis: ● Defender; ● Esquivar; ● Parry; ● Resultado de Preparar Ação.</p>
+<h4 class="subTitle">Esquiva</h4>
+<p>Em vez de defender, o alvo pode optar por esquivar, tentando evitar completamente o ataque. A esquiva é resolvida como um teste de acerto baseado em velocidade. Se o resultado da esquiva for maior que o teste de acerto do atacante, o ataque é totalmente evitado e causa zero dano. A fórmula para esquiva é: ● 1d20 + metade da velocidade + valores aplicáveis. A esquiva representa deslocamento rápido, leitura do movimento inimigo e uso do espaço ao redor. Em caso de falha, toma o dano completo do ataque.</p>
+<h4 class="subTitle">Parry</h4>
+<p>O Parry é uma defesa ofensiva realizada durante o embate. Ao se utilizar de parry, o personagem não apenas tenta anular o ataque, mas também responder imediatamente com um contra-ataque. Se o Parry for bem-sucedido o dano recebido é anulado e um contra-ataque imediato é aplicado. O alvo do contra-ataque não pode defender esse dano. Embora seja uma reação forte, Parry tem algumas condições que o tornam um ato situacional. ● O personagem deve ter alcance e método apropriado para contra-atacar e em caso de falha toma o dano completo; ● Possuí custo adicional de custo normal de energia+1d6.</p>
+<h4 class="subTitle">Teste De Parry</h4>
+<p>O Parry utiliza o mesmo teste de acerto ofensivo apropriado ao ataque ou técnica: 1d20 + metade do atributo apropriado + valores adicionais.</p>
+<h4 class="subTitle">Ataque</h4>
+<p>O valor de ataque representa a força, técnica ou potência aplicada no golpe utilizado na tentativa de danificar algo. Ataque segue a fórmula: ● 1d10 + atributo aplicável + valores adicionais. Sendo o atributo aplicável de acordo com a forma que você vai atacar.</p>
+<h4 class="subTitle">Defesa</h4>
+<p>A defesa normal representa a capacidade do alvo de absorver, bloquear ou resistir ao impacto de algo visando lhe danificar. Para se defender, você precisa utilizar do equivalente ao ataque, seguindo a fórmula: ● 1d10 + atributo de defesa aplicável + valores adicionais.</p>
+<h4 class="subTitle">Dano Final</h4>
+<p>Após comparar ataque e defesa, o dano final é calculado da seguinte forma: ● Dano = Resultado do ataque − Resultado da Defesa. Se o resultado for zero ou negativo, o dano causado é zero.</p>
+
+<h4 class="subTitle">Embate Narrativo</h4>
+<p>
+Rodar um 20 em qualquer teste de acerto ofensivo configura um crítico.
+O jogador que critou escolhe se quer entrar ou não em um embate narrativo.
+Se escolher entrar, deve declarar 3 ações obrigatoriamente ofensivas, já considerando acerto garantido e com custo de energia reduzido pela metade em todos seus gastos.
+O jogador alvo das ações ofensivas escolhe suas respectivas defesas para o embate, com algumas limitações:
+<br><br>
+● Preparar ações não funciona dentro de embates narrativos.<br>
+● Para realizar um parry ou evasiva o teste respectivo contra o valor de 20 garantido + valores aplicáveis oriundos do jogador que criou.
+<br><br>
+Depois de rodado todos os dados necessários, os jogadores intercalam entre si para descrever cenas que obrigatoriamente se interliguem e sejam de acordo com o dado.
+</p>
+
+        </div>
+      </section>
+    
+      <section class="infoChapter" id="cap-criacão-e-progressão-de-personagem">
+        <h3 class="chapterTitle">Criação E Progressão De Personagem</h3>
+        <div class="prose float">
+          <p>A criação do personagem define quem o personagem é, como ele age e como ele enfrenta os desafios do mundo. Cada personagem é construído a partir de atributos fundamentais que representam seu corpo, sua mente e seu espírito, e de caminhos que traduzem esses atributos em capacidades práticas durante o jogo. O sistema foi projetado para permitir escolhas claras e significativas desde o início, com progressão relativa e impacto real a cada nível de progressão.</p>
+<h4 class="subTitle">Atributos Principais</h4>
+<p>
+Todo personagem possui três Atributos Principais, que representam seus pilares fundamentais:<br><br>
+
+<strong>Corpo</strong> — força física, resistência e capacidade de ação direta.<br>
+<strong>Mente</strong> — percepção, raciocínio, precisão e controle emocional.<br>
+<strong>Espírito</strong> — poder sobrenatural, resistência espiritual e controle de energia.<br><br>
+
+Os Atributos Principais não são usados diretamente em testes. 
+Em vez disso, eles servem como base para os Caminhos, que representam como esse potencial é aplicado na prática.
+</p>
+<h4 class="subTitle">Caminhos</h4>
+<p>
+Cada Atributo Principal possui três Caminhos, que derivam diretamente dele. 
+Esses Caminhos são utilizados nos testes, cálculos e habilidades ao longo das sessões.<br><br>
+
+<strong>Corpo possuí:</strong><br>
+● Ataque, a base para o dano de ataques físicos corpo a corpo, sendo utilizado no embate ofensivo;<br>
+● Defesa, a base para reduzir dano durante embates. Também influencia diretamente os Pontos de Vida conforme a progressão;<br>
+● Velocidade, que é utilizada para calcular deslocamento, distância, iniciativa e ações relacionadas à mobilidade.<br><br>
+
+<strong>Mente possuí:</strong><br>
+● Percepção, utilizada em testes de observação, leitura de combate e situações narrativas quando apropriado;<br>
+● Precisão, base para acerto de ataques à distância, como projéteis;<br>
+● Foco, representa resistência e defesa mental, sendo usada em habilidades e defesas psicológicas.<br><br>
+
+<strong>Espírito possuí:</strong><br>
+● Potência, a base ofensiva e de acerto para poderes e técnicas sobrenaturais;<br>
+● Resistência Espiritual, é utilizada para resistir a efeitos espirituais, sobrenaturais ou energéticos;<br>
+● Energia, representa o foco do personagem no controle de energia e influencia diretamente a progressão da Energia Máxima.
+</p>
+<h4 class="subTitle">Níveis</h4>
+<p>O nível máximo que um personagem pode alcançar é cinco. Cada nível representa um avanço nas capacidades do personagem, porém nesse sistema a evolução de níveis funciona diferente do convencional. Aqui, os níveis representam apenas a evolução dos seus atributos. Existem uma série de outras evoluções paralelas ao nível do personagem, de acordo com a classe escolhida.</p>
+<h4 class="subTitle">Atributos No Nível Zero</h4>
+<p>No nível 0, o jogador recebe 6d6 para distribuir entre os Atributos Principais. É permitido colocar um máximo de três dados e um mínimo de um dado inicial em um mesmo atributo principal. Após rolar os dados, adicione o resultado de cada dado em um caminho, conforme desejar. Essa etapa define o estilo inicial do personagem e suas principais forças.</p>
+<h4 class="subTitle">Subindo De Nível</h4>
+<p>Ao subir de nível, o personagem recebe 1d4, que deve ser aplicado diretamente em um Caminho de qualquer Atributo Principal. Cada escolha de progressão tem impacto direto tanto nas capacidades mecânicas quanto no papel narrativo do personagem.</p>
+<h4 class="subTitle">Pontos De Vida</h4>
+<p>Além dos atributos, todo personagem possui dois recursos , sendo um deles Pontos de Vida. Os personagens começam com 20 Pontos de Vida. Os Pontos de Vida representam a capacidade do personagem de continuar lutando. O valor de PV nunca fica negativo. Quando o PV chega a zero, o personagem cai e fica incapacitado, não podendo realizar ações. Em seu turno, ele deve realizar um Teste de Sobrevivência rodando 1d20. Se o resultado acima de dez, configura como acerto. Caso contrário, resulta em falha. Com dois acertos, o personagem levanta com um de vida. E com duas falhas, morre.</p>
+<h4 class="subTitle">Energia</h4>
+<p>A Energia é o recurso universal utilizado para executar ações, ativar habilidades e todas as outras ações possíveis. Todos os personagens começam com 20 Pontos de Energia. Além disso, é preciso rolar 1d10 durante a criação da ficha para definir o padrão de gasto de energia para qualquer ação de um personagem.</p>
+<h4 class="subTitle">Aumento De Vida E Energia</h4>
+<p>Ao subir de nível, o ganho de Pontos de Vida e de Energia depende da direção em que os dados foram investidos naquele nível. Para Pontos de Vida: ● A cada 1 adicionado em defesa ganha-se +1d10 PV. ● Se o jogador não investir nada em defesa naquele nível, ganha +1d4 PV. Para Energia: ● Para cada ponto investido em energia, ganha-se +1d12 de Energia Máxima. ● Se o jogador não investir em ENERGIA, ganha +1d6 de Energia Máxima.</p>
+<h4 class="subTitle">Recuperação De Energia</h4>
+<p>Existem três formas de recuperar energia: ● Descanso completo, normalmente ao final de uma sessão, recupera totalmente a Energia Máxima; ● Descanso simples, realizado no intervalo entre batalhas, recupera metade da Energia Máxima; ● Recuperar Fôlego, que é feito como uma ação não ofensiva em uma batalha, uma vez por turno, recuperando 1d10 de energia e contando como uma ação completa. A gestão de energia é um dos pilares do sistema, e o uso descuidado desse recurso pode deixar o personagem vulnerável em momentos críticos.</p>
+        </div>
+      </section>
+    
+      <section class="infoChapter" id="cap-classes">
+        <h3 class="chapterTitle">Classes</h3>
+        <div class="prose float">
+          <p>Neste sistema, as classes não representam profissões fixas, mas sim a natureza existencial do personagem e a forma como ele interage com o sobrenatural. Todo personagem pertence a um dos dois grandes grupos: Seres Sobrenaturais ou Humanos. Essa escolha define não apenas habilidades, mas também limitações, progressão e a forma como o mundo reage à sua existência.</p>
+<h4 class="subTitle">Seres Sobrenaturais</h4>
+<p>Seres sobrenaturais são entidades que não nascem prontas. Eles surgem sem forma definida, sendo moldados ao longo do tempo pela crença, pelo medo, pela reverência e pela imaginação humana. Sua identidade é construída a partir de arquétipos, que refletem o inconsciente coletivo da humanidade. Após terem sua forma definida, esses seres passam a existir sob o domínio de uma das três grandes forças divinas, determinadas pela relação que mantêm com a humanidade: <br><br>● Anjos, seres vistos como benéficos para humanidade, associados à proteção, orientação ou salvação.<br><br>● Demônios, seres vistos de forma negativa, ligados à corrupção, destruição ou oposição direta aos humanos.<br><br>● Entidades, seres analisados de forma neutra ou indefinida, cujas intenções não são claras ou não seguem a moral humana.<br></p>
+<h4 class="subTitle">Arquétipos</h4>
+<p>Arquétipos são a materialização dos mitos, lendas e símbolos acumulados ao longo da história da civilização humana. Eles representam a forma como a humanidade interpreta determinados conceitos, criaturas ou ideias. Ao criar um ser sobrenatural, o jogador escolhe um arquétipo livremente. Esse arquétipo concede poderes e fraquezas baseados nas descrições mitológicas associadas a ele. Essas características não são opcionais: fazem parte da essência do ser. Arquétipos não definem personagens únicos. Dois seres podem compartilhar o mesmo arquétipo e ainda assim serem completamente diferentes.</p>
+<h4 class="subTitle">Assinatura Existencial</h4>
+<p>A Assinatura Existencial é a forma única como um ser sobrenatural manifesta seu arquétipo. Ela representa aquilo que diferencia personagens que compartilham a mesma origem mítica. Durante a criação, todo jogador que optar por um ser sobrenatural deve escolher um poder do arquétipo para manifestar de forma personalizada e escolher uma fraqueza do arquétipo para também se manifestar de forma única.</p>
+<h4 class="subTitle">Habilidades De Um Arquétipo</h4>
+<p>Seres sobrenaturais possuem habilidades e fraquezas definidas tanto pelo arquétipo quanto pela assinatura existencial. Durante a criação, o jogador deve selecionar um poder original do arquétipo, selecionar uma fraqueza original do arquétipo e considerar também o poder e a fraqueza definidos pela assinatura existencial. <br>Para cada um desses quatro elementos, o jogador rola 1d4 para definir o dado associado àquela característica:<br><br>● Resultado 1: 1d4.<br>● Resultado 2: 1d6.<br>● Resultado 3: 1d8.<br>● Resultado 4: 1d10.<br><br>Esses dados representam a intensidade daquela característica. Quando o personagem utiliza um poder, ele pode adicionar o dado correspondente aos cálculos da ação. Da mesma forma, outros personagens recebem o dado associado à fraqueza ao explorá-la em uma ação contra o ser sobrenatural.<br></p>
+<h4 class="subTitle">Nível De Exposição</h4>
+<p>O Nível de Exposição representa o quão real um ser sobrenatural é para a humanidade. Quanto mais pessoas<br><br>acreditam, temem ou cultuam sua existência, mais poderoso ele se torna. O Nível Existencial varia de zero a cinco: <br>● 0 — Lenda: existe apenas em boatos, mitos e histórias. <br>● 1 — Sombra: há testemunhos isolados e provas inconclusivas. <br>● 2 — Oculto Ativo: organizações humanas sabem da existência, mas não há comprovação pública. <br>● 3 — Provado: registros, vídeos e relatos amplamente divulgados. <br>● 4 — Verdade: a existência é aceita pelo mundo; cultos se formam. <br>● 5 — Divindade: milhões cultuam o ser; guerras são travadas em seu nome.<br></p>
+<h4 class="subTitle">Fortalecimento Com Ne</h4>
+<p>Além do impacto narrativo, o Nível Existencial é a principal fonte de fortalecimento dos seres sobrenaturais. Para cada Nível Existencial, o personagem pode adicionar um dado explosivo ao potencializar ações que envolvam dados:<br><br>● NE 1: 1d4.<br>● NE 2: 1d6.<br>● NE 3: 1d8.<br>● NE 4: 1d10.<br>● NE 5: 1d12.<br><br>Esses dados representam a energia sobrenatural acumulada através da crença humana.<br></p>
+<h4 class="subTitle">Humanos</h4>
+<p>Os jogadores também podem optar por criar personagens humanos. Contudo, neste sistema, nenhum humano que tenha contato constante com o sobrenatural permanece comum.</p>
+<p>A convivência com forças além da compreensão humana gera adaptações físicas, mentais ou energéticas conhecidas como Exposição ao Sobrenatural.</p>
+<h4 class="subTitle">Exposição Ao Sobrenatural</h4>
+<p>A Exposição ao Sobrenatural mede o quanto um humano se adaptou à presença do sobrenatural. Ela varia de zero a cinco e reflete resistência, preparo e experiência. Quanto maior a Exposição ao Sobrenatural, mais capaz o humano se torna de enfrentar seres sobrenaturais em condições próximas de igualdade. Existem três grandes formas de adaptação, que definem o tipo de humano criado.</p>
+<h4 class="subTitle">Humanos Com Artefatos</h4>
+<p>Humanos com artefatos utilizam fragmentos de arquétipos materializados em objetos. Esses humanos possuem grande reserva de energia, mas dependem diretamente de seus artefatos. No nível zero ganham 3d6 adicionais para investir obrigatoriamente em energia. Sempre que utilizam habilidades de um artefato, gastam 1d4 de energia adicional.<br><br>Humanos com Artefatos possuem a mecânica exclusiva Overdrive. Ao ativá-la, humanos: ● Entram em estado de sobrecarga, gastando um adicional de 1d4 de energia por turno; ● Não podem desligar o Overdrive até que a energia chegue a 0, desmaiando logo em seguida; ● Recebem 1d4 adicional em qualquer teste que utilize o artefato.</p>
+<p>Humanos com Artefatos possuem a mecânica exclusiva Overdrive. Ao ativá-la, humanos: ● Entram em estado de sobrecarga, gastando um adicional de 1d4 de energia por turno; ● Não podem desligar o Overdrive até que a energia chegue a 0, desmaiando logo em que desmaiam; ● Recebem 1d4 adicional em qualquer teste que utilize o artefato.</p>
+<h4 class="subTitle">Humanos Com Treinamento Extremo</h4>
+<p>Humanos com treinamento extremo levaram o corpo além dos limites naturais. Eles enfrentam o sobrenatural por meio de preparo físico, disciplina e técnica, sem depender de ferramentas externas. Essa abordagem permite ultrapassar limites humanos convencionais e sustentar confrontos diretos com seres sobrenaturais.</p>
+<h4 class="subTitle">Humanos Despertos</h4>
+<p>Humanos Despertos são aqueles que passaram por esse processo e retornaram mudados. Eles permanecem humanos, mas já não pertencem totalmente ao mundo comum. Sua existência passa a oscilar entre o racional e o inexplicável. Diferente de seres sobrenaturais, humanos despertos não são fontes naturais de poder. Tudo o que fazem depende de controle, preparo e risco constante. Quanto maior o uso, maior o desgaste.</p>
+<p>Eles são o mais próximo que um humano pode chegar do sobrenatural sem deixar de sê-lo. Humanos despertos possuem obrigatoriamente: ● Uma Fonte Sobrenatural; ● Uma Forma de Mediação; ● Uma mecânica exclusiva chamada Medidor de Domínio, que representa controle e risco ao utilizar manifestações sobrenaturais.</p>
+<h4 class="subTitle">Especializações</h4>
+<p>Além das evoluções padrão, humanos podem culminar seu treinamento em Especializações. A partir do nível 1 de ES, personagens humanos ganham 1 ponto de especialização por nível de ES. Esses pontos são aplicados como bônus em testes que utilizem um dos três Caminhos de um Atributo Principal, porém apenas um Caminho pode ser especializado. O limite padrão de especialização é +5. Humanos com Treinamento Extremo recebem dois pontos de especialização por nível de ES, a partir do nível 1, podendo escolher duas especializações. No nível 5 de ES, totalizam dez pontos de especialização, podendo ultrapassar o limite de +5 em um Caminho. Builds híbridas recebem a quantidade normal de pontos, mas podem dividir entre duas especializações, respeitando as seguintes regras: ● Divisão máxima: 4 para 1 ou 3 para 2; ● Mínimo de 1 ponto em cada especialização.</p>
+<p>escolher duas especializações. No nível 5 de ES, totalizam dez pontos de especialização, podendo ultrapassar o limite de +5 em um Caminho. Builds híbridas recebem a quantidade normal de pontos, mas podem dividir entre duas especializações, respeitando as seguintes regras: ● Divisão máxima: 4 para 1 ou 3 para 2; ● Mínimo de 1 ponto em cada especialização.</p>
+        </div>
+      </section>
+    
+      <section class="infoChapter" id="cap-artefatos">
+        <h3 class="chapterTitle">Artefatos</h3>
+        <div class="prose float">
+          <p>Artefatos são itens sobrenaturais criados a partir de fragmentos de arquétipos, manifestações de crença ou resquícios de entidades além da compreensão humana. Eles permitem que humanos enfrentem criaturas e eventos sobrenaturais mesmo sem possuírem poderes naturais. Um artefato não é apenas uma ferramenta: ele funciona como uma extensão do usuário, amplificando ações, criando efeitos únicos e concedendo técnicas especiais. Em contrapartida, todo artefato cobra um alto custo energético, exigindo controle, preparo e risco constante.</p>
+<p>Não existe uma forma padrão para artefatos. Eles podem assumir qualquer aparência — armas, máscaras, luvas, armaduras, livros, totens, correntes ou objetos aparentemente comuns. O que realmente define um artefato são seus Traços de Afinidade Geral, que determinam o tipo de habilidades que ele pode manifestar.</p>
+<h4 class="subTitle">Pontos De Artefato</h4>
+<p>Artefatos evoluem junto com seus usuários. Ao derrotar seres sobrenaturais, artefatos costumam absorver fragmentos de energia residual, gerando Pontos de Artefato. Os Pontos de Artefato são utilizados para: ● Aumentar o número de slots de habilidades do artefato; ● Aprimorar a potência de habilidades existentes; ● Expandir ou refinar os efeitos das habilidades; ● Evoluir e controlar o estado de Overdrive. A evolução de um artefato é gradual e personalizada, refletindo tanto as escolhas do jogador quanto o tipo de confrontos enfrentados.</p>
+<h4 class="subTitle">Habilidades Do Artefato</h4>
+<p>Artefatos possuem habilidades sobrenaturais próprias. Toda habilidade de artefato deve obrigatoriamente possuir ao menos um Traço de Afinidade Geral, que define sua função principal. Inicialmente, cada habilidade concede 1d4 adicional ao teste no qual for utilizada. Esse valor pode ser aumentado ao investir Pontos de Artefato, tornando a habilidade mais poderosa — e mais perigosa de manter ativa por longos períodos.</p>
+<h4 class="subTitle">Traços De Afinidade Geral</h4>
+<p>Os Traços de Afinidade Geral definem a natureza das habilidades que um artefato pode manifestar. Cada TAG representa uma abordagem específica de combate, suporte ou interação com o sobrenatural. Todo artefato começa com uma TAG inicial, e novas TAGs podem ser desbloqueadas conforme o usuário evolui sua Exposição ao Sobrenatural (ES):<br><br>● Es 0: 1 TAG.<br><br>● ES 3: 2 TAGs.<br><br>● ES 5: 3 TAGs.</p>
+<h4 class="subTitle">Dano</h4>
+<p>Artefatos com a TAG Dano são voltados para agressão direta e eliminação de ameaças. Suas habilidades focam em atacar, marcar alvos e escalar dano ao longo do combate. Esses artefatos recompensam ofensiva contínua, foco em um alvo específico ou condições que ampliam o impacto dos golpes, pressionando inimigos constantemente.</p>
+<h4 class="subTitle">Defesa</h4>
+<p>A TAG Defesa representa a capacidade do artefato de absorver, reduzir ou negar dano. Habilidades defensivas envolvem escudos, mitigação passiva ou ativa e bloqueios reativos. Artefatos defensivos são essenciais para resistir a explosões de dano, sustentar posições perigosas e sobreviver a confrontos prolongados.</p>
+<h4 class="subTitle">Controle</h4>
+<p>Artefatos com a TAG Controle focam em limitar, atrapalhar ou interromper ações inimigas. Suas habilidades aplicam debuffs, interrupções e travas temporárias.</p>
+<p>O objetivo do controle não é eliminar rapidamente, mas quebrar o ritmo do combate, restringindo opções adversárias e criando vantagem tática.</p>
+<h4 class="subTitle">Suporte</h4>
+<p>A TAG Suporte está ligada à manutenção e fortalecimento de aliados. Habilidades dessa categoria permitem cura, buffs e remoção de condições negativas. Artefatos de suporte não dominam o combate sozinhos, mas são fundamentais para garantir sobrevivência, consistência e recuperação sob pressão extrema.</p>
+<h4 class="subTitle">Mobilidade</h4>
+<p>Artefatos com a TAG Mobilidade controlam posicionamento e deslocamento no campo de batalha. Essas habilidades incluem dash, evasão e reposicionamento, podendo afetar o próprio usuário, aliados ou até inimigos. Mobilidade define quem entra, quem sai e onde o combate acontece, sendo crucial para evitar perigos ou perseguir alvos prioritários.</p>
+<h4 class="subTitle">Anti-Sobrenatural</h4>
+<p>A TAG Anti-Sobrenatural representa especialização contra entidades e fenômenos sobrenaturais. Habilidades dessa categoria permitem selar poderes, reduzir NE e detectar presenças ocultas ou anômalas. Esses artefatos são ferramentas de caçada e contenção, projetadas para neutralizar vantagens que humanos comuns não conseguiriam enfrentar.</p>
+<h4 class="subTitle">Slots Do Artefato</h4>
+<p>Artefatos possuem um número limitado de habilidades que podem ser equipadas simultaneamente, representado pelos slots do artefato. Todo artefato começa com 2 slots de habilidade. Cada slot adicional custa o dobro de PA do slot anterior. Esse limite força escolhas estratégicas, impedindo que um único artefato cubra todas as funções possíveis ao mesmo tempo.</p>
+<h4 class="subTitle">Overdrive</h4>
+<p>O Overdrive é um estado de sobrecarga no qual o usuário força o artefato além de seus limites naturais. Enquanto o Overdrive estiver ativo o usuário gasta 1d4 de energia por turno e ganha 1d4 adicional em todos os testes que utilizem habilidades do artefato. Humanos são incapazes de sair do Overdrive naturalmente. Ao ativar essa capacidade, o estado permanece ativo até que a energia do usuário chegue a 0, momento em que ele desmaia. O Overdrive pode ser evoluído, aumentando seus benefícios e reduzindo seus efeitos negativos.</p>
+<h4 class="subTitle">Níveis De Overdrive</h4>
+<p>Ao focar em evoluir o Overdrive de um artefato, ganha-se: <br><br>● Overdrive 2: bônus se torna 1d6.<br><br>● Overdrive 3: bônus se torna 1d8.<br><br>● Overdrive 4: bônus se torna 1d10 e o usuário pode optar por substituir o Overdrive por Overdrive Controlado.<br><br>● Overdrive 5: O bônus passa a ser 1d12 e ao chegar a 0 de energia, o Overdrive se desativa sem causar desmaio.</p>
+<h4 class="subTitle">Overdrive Controlado</h4>
+<p>O Overdrive Controlado é uma versão mais estável e segura do Overdrive. Enquanto ativo: ● Concede 1d8 de bônus em todos os testes; ● Consome 1d6 de energia por turno. Diferente do Overdrive comum, o usuário pode ativar e desativar livremente essa forma. Após desativá-la, há um tempo de recarga de 2 turnos antes que possa ser ativada novamente. Essa forma representa domínio avançado do artefato, permitindo uso estratégico sem risco imediato de colapso.</p>
+        </div>
+      </section>
+    
+      <section class="infoChapter" id="cap-despertar">
+        <h3 class="chapterTitle">Despertar</h3>
+        <div class="prose float">
+          <p>O Despertar é o momento em que um humano comum entra em contato direto com o sobrenatural em uma situação extrema — violenta, traumática ou absolutamente fora de sua compreensão — e sobrevive. Não por sorte, mas por adaptação. Ao atravessar esse limite, o corpo e a mente do humano criam um mecanismo de defesa forçado, desenvolvendo uma ligação instintiva com aquilo que quase o destruiu. Esse processo não concede imunidade, mas cria afinidade. A partir desse ponto, o humano deixa de ser apenas uma vítima do sobrenatural e passa a ser capaz de interagir, resistir e, sob certas condições, manipular forças além da realidade comum.</p>
+<h4 class="subTitle">Humanos Despertos</h4>
+<p>Humanos Despertos são aqueles que passaram por esse processo e retornaram mudados. Eles permanecem humanos,</p>
+<p>mas já não pertencem totalmente ao mundo comum. Sua existência passa a oscilar entre o racional e o inexplicável. Diferente de seres sobrenaturais, humanos despertos não são fontes naturais de poder. Tudo o que fazem depende de controle, preparo e risco constante. Quanto maior o uso, maior o desgaste.</p>
+<h4 class="subTitle">Fonte Sobrenatural</h4>
+<p>Todo humano desperto precisa de uma Fonte Sobrenatural, que define a origem e a natureza de suas novas capacidades. A Fonte Sobrenatural representa de onde vem o poder, podendo assumir diversas formas, como: ● Um pacto com uma entidade ou divindade guardiã; ● Uma força psíquica despertada em situação extrema; ● Um espírito que acompanha ou possui o humano; ● Um fenômeno anômalo ligado à sua existência. Mas não especificamente limitada apenas ao citado acima. A Fonte define o tipo de efeito possível, os limites do poder e os riscos associados ao seu uso.</p>
+<h4 class="subTitle">Forma De Mediação</h4>
+<p>Nenhuma Fonte Sobrenatural se manifesta livremente. Ela sempre precisa de uma Forma de Mediação, que representa como o poder atravessa o humano e se expressa no mundo. A Forma de Mediação estabelece condições claras para o uso da Fonte e pode assumir diversas naturezas: ● Talismãs, marcas ou objetos vinculados; ● possessões parciais ou totais; ● Rituais, gestos ou palavras específicas; ● Fenômenos corporais ou ambientais. E diversas outras. Toda utilização da Fonte Sobrenatural consome Energia de Domínio, refletindo o esforço necessário para manter o controle da manifestação.</p>
+<h4 class="subTitle">Medidor De Domínio E Energia De Domínio</h4>
+<p>O Medidor de Domínio representa o grau de controle que o humano desperto possui sobre sua Fonte Sobrenatural. Ele define tanto a eficiência quanto o risco ao utilizar o poder. A Energia de Domínio representa o quanto o humano pode utilizar sua Fonte antes de entrar em Exaustão Sobrenatural. Todo Humano Desperto começa com 4d6 de Energia de Domínio. Além disso, a cada nível de ES, a Energia de Domínio máxima aumenta em 1d4. Sempre que uma situação envolver diretamente a Fonte Sobrenatural, o personagem gasta 1d4 de Energia de Domínio, independentemente do sucesso da ação e também adiciona 1d4 ao teste envolvendo a Fonte Sobrenatural. Esse gasto representa o esforço constante de manter o controle, mesmo fora do combate. A cada nível aumentado de ES, o Medidor de Domínio também aumenta em um nível. E para cada nível de Domínio, o valor do dado adicionado aos testes aumenta em dois.</p>
+<h4 class="subTitle">Exaustão Sobrenatural</h4>
+<p>Exaustão Sobrenatural é a reação da Fonte Sobrenatural quando o controle exercido por um Humano Desperto falha ou é levado além de seus limites. Ele representa o momento em que o sobrenatural deixa de ser contido de forma estável e passa a pressionar, reagir ou se manifestar de maneira hostil. A Exaustão Sobrenatural ocorre quando: ● Um Humano Desperto sofre Exaustão Sobrenatural sempre que uma das condições abaixo é atendida; ● O valor de Energia de Domínio disponível chega a 0; ● O personagem tenta utilizar sua Fonte Sobrenatural sem Energia de Domínio disponível; ● O personagem força o uso da Fonte além dos limites estabelecidos; ● A Fonte ou o ambiente reage de forma hostil, conforme a situação narrativa. Sempre que uma dessas condições ocorre, a Exaustão Sobrenatural é imediata e inevitável.</p>
+<h4 class="subTitle">Natureza Da Exaustão Sobrenatural</h4>
+<p>A Exaustão Sobrenatural pode se manifestar de diferentes formas, dependendo da Fonte Sobrenatural e da Forma de Mediação do personagem. Em termos gerais, ele pode afetar: ● O corpo, causando dano físico ou exaustão; ● A mente, causando confusão, colapso ou penalidades; ● A relação com a Fonte, gerando resistência, rejeição ou instabilidade; ● O controle do efeito, fazendo com que ele se manifeste de forma imprecisa ou perigosa; ● A situação narrativa, criando consequências externas relevantes. O Mestre decide a manifestação exata da Exaustão Sobrenatural, levando em conta a Fonte envolvida e o contexto da cena.</p>
+<h4 class="subTitle">Intensidade Da Exaustão Sobrenatural</h4>
+<p>A intensidade do Exaustão Sobrenatural está diretamente ligada ao nível de Exposição ao Sobrenatural do personagem. Quanto maior o ES, maior o grau de domínio sobre a Fonte — e, consequentemente, mais severas são as consequências quando o controle falha. A Exaustão Sobrenatural deve sempre representar uma perda significativa, seja em recursos, ações, controle ou posição narrativa. Com a progressão, o Humano Despertos pode aprender a lidar melhor com suas consequências. Conforme o ES do personagem evolui: ● ES 3: Pode antecipar ou reconhecer sinais de colapso; ● ES 4: Pode lidar com o impacto de forma mais consciente; ● ES 5: Pode escolher entre consequências possíveis, quando aplicável.</p>
+        </div>
+      </section>
+
+            <section class="infoChapter" id="cap-treinamento-extremo">
+  <h3 class="chapterTitle">Treinamento Extremo</h3>
+  <div class="prose float">
+    <p>Humanos com treinamento extremo possuem a capacidade de realizar ações relacionadas a seu treinamento com perfeita maestria. Ao escolher criar um humano com treinamento extremo, escolha um caminho para ter treinamento e receba os seguinte bônus:</p>
+    <p>● Limiar de críticos reduzido para 18.<br>
+       ● Toda vez que fizer um teste relacionado ao seu treinamento, pode fazer duas rolagens e escolher o maior valor.</p>
+  </div>
+</section>
+
+    
+          </article>
+        </div>
+    </section>
+
+      </div>
+    </section>
+
+    <section id="contato" style="padding-bottom: calc(var(--sectionY) + 30px);">
+      <div class="reveal">
+        <h2 class="sectionTitle">Contate-me</h2>
+        <p class="lead" style="max-width:80ch;">Quer jogar, testar, colaborar, ou enviar feedback? Me chama.</p>
+
+        <div class="contactActions">
+  <a
+    href="https://discord.gg/SEU_LINK_AQUI"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="discordBtn"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M20.3 4.1A18.6 18.6 0 0 0 16.7 3c-.2.4-.5 1-.7 1.4a17.4 17.4 0 0 0-4 0c-.2-.4-.5-1-.7-1.4-1.3.2-2.6.6-3.6 1.1C4.8 7 4 9.8 4.3 12.6c1.6 1.2 3.2 1.9 4.8 2.3.4-.5.8-1 1.1-1.6-.6-.2-1.2-.4-1.7-.7.1-.1.3-.2.4-.3 3.2 1.5 6.7 1.5 9.8 0 .1.1.3.2.4.3-.5.3-1.1.5-1.7.7.3.6.7 1.1 1.1 1.6 1.6-.4 3.2-1.1 4.8-2.3.3-3-1-5.8-3-8.5zM9.8 14.5c-.9 0-1.6-.8-1.6-1.7s.7-1.7 1.6-1.7 1.6.8 1.6 1.7-.7 1.7-1.6 1.7zm4.4 0c-.9 0-1.6-.8-1.6-1.7s.7-1.7 1.6-1.7 1.6.8 1.6 1.7-.7 1.7-1.6 1.7z"/>
+    </svg>
+
+    Entrar no Discord
+  </a>
+</div>
+
+        
+
+        <div style="margin-top:40px; color: rgba(255,255,255,.55); font-size:.92rem;">
+          © <span id="year"></span> DVA — Demon vs Angel
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button class="toTop" id="toTop" type="button" aria-label="Voltar ao topo">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 5l7 7-1.4 1.4L13 8.8V20h-2V8.8L6.4 13.4 5 12l7-7z"/>
+    </svg>
+  </button>
+
+  <div class="audioPrompt" id="audioPrompt" aria-live="polite">
+    <div class="audioPromptTitle">Atmosfera sonora</div>
+    <div class="audioPromptText">Quer ativar música de fundo?</div>
+    <div class="audioPromptActions">
+      <button class="audioPBtn audioPBtnPrimary" id="audioEnable" type="button">Ativar</button>
+      <button class="audioPBtn" id="audioDismiss" type="button">Sem música</button>
+    </div>
+  </div>
+
+  <button class="audioFab" id="audioFab" type="button" aria-label="Configurar música">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M16.8 3.6c.4-.1.8.2.8.6v10.1c0 2-1.8 3.7-4.1 3.7-2 0-3.6-1.2-3.6-2.9S11.5 12 13.5 12c.9 0 1.7.2 2.3.6V7.1l-7 1.7v7.2c0 2-1.8 3.7-4.1 3.7-2 0-3.6-1.2-3.6-2.9s1.6-3.1 3.6-3.1c.9 0 1.7.2 2.3.6V6.8c0-.3.2-.6.5-.6l8.3-2.6z"/>
+    </svg>
+  </button>
+
+  <audio id="bgm" preload="auto" loop>
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    document.body.classList.add('js');
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Smooth scroll navbar
+    const navLinks = Array.from(document.querySelectorAll('.nav a'));
+    navLinks.forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = a.getAttribute('href');
+        const target = document.querySelector(id);
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Botão topo
+    const toTop = document.getElementById('toTop');
+    toTop.addEventListener('click', () => {
+      document.getElementById('top').scrollIntoView({behavior:'smooth'});
+    });
+
+    // ===== ADVANCED SCROLL FX =====
+    const video = document.getElementById('bgVideoEl');
+    const solid = document.getElementById('bgSolid');
+    const grid = document.getElementById('gridLayer');
+    const sigils = document.getElementById('sigilsLayer');
+    const fog = document.getElementById('fogLayer');
+
+    function clamp01(n){ return Math.max(0, Math.min(1, n)); }
+    function getFadeRange(){
+      const start = 140;
+      const end = Math.min(window.innerHeight * 1.05, 980);
+      return { start, end };
+    }
+
+    let ticking = false;
+
+    function updateScrollFX(){
+      const y = window.scrollY || 0;
+      const { start, end } = getFadeRange();
+      const t = clamp01((y - start) / (end - start));
+
+      if (video){
+        video.style.opacity = String(1 - t);
+        const blur = (t * 2.2).toFixed(2);
+        video.style.filter = `contrast(1.02) saturate(${(0.95 - t*0.15).toFixed(2)}) blur(${blur}px)`;
+        video.style.transform = `scale(${(1.08 + t*0.02).toFixed(3)})`;
+      }
+      if (solid) solid.style.opacity = String(t);
+
+      if (grid){
+        const dy = y * 0.08;
+        grid.style.transform = `translate3d(${(-dy*0.12).toFixed(1)}px, ${(dy).toFixed(1)}px, 0)`;
+        grid.style.opacity = String(0.18 + t * 0.10);
+      }
+      if (sigils){
+        const dy = y * 0.12;
+        sigils.style.transform = `translate3d(${(dy*0.06).toFixed(1)}px, ${(-dy*0.22).toFixed(1)}px, 0)`;
+        sigils.style.opacity = String(0.22 + t * 0.12);
+      }
+      if (fog){
+        const dy = y * 0.10;
+        fog.style.transform = `translate3d(${(dy*0.10).toFixed(1)}px, ${(dy*0.22).toFixed(1)}px, 0)`;
+        fog.style.opacity = String(0.34 + t * 0.18);
+      }
+
+      toTop.classList.toggle('is-visible', y > 520);
+      ticking = false;
+    }
+
+    function onScroll(){
+      if (!ticking){
+        requestAnimationFrame(updateScrollFX);
+        ticking = true;
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => updateScrollFX());
+    updateScrollFX();
+
+    // Reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealIO = new IntersectionObserver((entries) => {
+      for (const e of entries){
+        if (e.isIntersecting){
+          e.target.classList.add('is-visible');
+          revealIO.unobserve(e.target);
+        }
+      }
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => revealIO.observe(el));
+
+    // Navbar active highlight
+    const sections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const navIO = new IntersectionObserver((entries) => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      navLinks.forEach(a => a.classList.toggle('is-active', a.getAttribute('href') === `#${visible.target.id}`));
+    }, { threshold: [0.2, 0.35, 0.55, 0.75] });
+    sections.forEach(s => navIO.observe(s));
+
+    // ===== Partículas =====
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d', { alpha: true });
+    let W = 0, H = 0, DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+
+    function resizeCanvas(){
+      W = Math.floor(window.innerWidth);
+      H = Math.floor(window.innerHeight);
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const particleCount = Math.min(140, Math.max(80, Math.floor(W / 10)));
+    const particles = Array.from({ length: particleCount }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 0.7 + Math.random() * 1.9,
+      vx: -0.06 + Math.random() * 0.12,
+      vy: 0.08 + Math.random() * 0.18,
+      a: 0.10 + Math.random() * 0.20,
+      tw: 0.002 + Math.random() * 0.006,
+      phase: Math.random() * Math.PI * 2,
+      hue: Math.random() < 0.15 ? 'rgba(255,80,80,' : 'rgba(255,255,255,'
+    }));
+
+    let last = performance.now();
+    function draw(now){
+      const dt = Math.min(32, now - last);
+      last = now;
+
+      ctx.clearRect(0, 0, W, H);
+
+      const y = window.scrollY || 0;
+      const scrollShift = (y * 0.03) % H;
+
+      for (const p of particles){
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        if (p.x < -10) p.x = W + 10;
+        if (p.x > W + 10) p.x = -10;
+        if (p.y > H + 12) p.y = -12;
+
+        p.phase += p.tw * dt;
+        const alpha = p.a + Math.sin(p.phase) * 0.06;
+
+        const yy = (p.y + scrollShift) % H;
+        ctx.beginPath();
+        ctx.arc(p.x, yy, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.hue + alpha.toFixed(3) + ')';
+        ctx.fill();
+      }
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    // ===== Música =====
+    const bgm = document.getElementById('bgm');
+    const promptEl = document.getElementById('audioPrompt');
+    const fabEl = document.getElementById('audioFab');
+    const enableBtn = document.getElementById('audioEnable');
+    const dismissBtn = document.getElementById('audioDismiss');
+
+    bgm.volume = 0.5;
+    const AUDIO_KEY = 'dva_audio_choice_v2';
+
+    function showPrompt(){ promptEl.style.display = 'block'; fabEl.style.display = 'none'; }
+    function hidePrompt(){ promptEl.style.display = 'none'; fabEl.style.display = 'grid'; }
+
+    enableBtn.addEventListener('click', async () => {
+      try{
+        await bgm.play();
+        localStorage.setItem(AUDIO_KEY, 'yes');
+        enableBtn.textContent = 'Ativar';
+        hidePrompt();
+      }catch(e){
+        enableBtn.textContent = 'Clique de novo';
+      }
+    });
+
+    dismissBtn.addEventListener('click', () => {
+      bgm.pause();
+      bgm.currentTime = 0;
+      localStorage.setItem(AUDIO_KEY, 'no');
+      hidePrompt();
+    });
+
+    fabEl.addEventListener('click', () => {
+      showPrompt();
+      dismissBtn.textContent = bgm.paused ? 'Sem música' : 'Parar';
+      dismissBtn.onclick = () => {
+        bgm.pause();
+        bgm.currentTime = 0;
+        localStorage.setItem(AUDIO_KEY, 'no');
+        hidePrompt();
+        dismissBtn.onclick = null;
+        dismissBtn.textContent = 'Sem música';
+      };
+    });
+
+    const prev = localStorage.getItem(AUDIO_KEY);
+    if (prev === null) showPrompt();
+    else if (prev === 'no'){ promptEl.style.display = 'none'; fabEl.style.display = 'grid'; }
+    else bgm.play().then(() => hidePrompt()).catch(() => showPrompt());
+
+    // ===== TOC Search =====
+    const tocSearch = document.getElementById('tocSearch');
+    const tocList = document.getElementById('tocList');
+    if (tocSearch && tocList){
+      const tocLinks = Array.from(tocList.querySelectorAll('a'));
+      tocSearch.addEventListener('input', () => {
+        const q = (tocSearch.value || '').trim().toLowerCase();
+        tocLinks.forEach(a => {
+          const txt = (a.textContent || '').toLowerCase();
+          a.style.display = txt.includes(q) ? '' : 'none';
+        });
+      });
+    }
+  </script>
+</body>
+</html>
